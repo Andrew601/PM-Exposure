@@ -1,0 +1,61 @@
+---
+title: "PM Exposure"
+author: "AB, AH, MK"
+format: html
+editor: visual
+---
+
+#### setup
+
+```{r}
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(forecast)
+library(multcomp)
+library(nlme)
+library(corrplot)
+library(mvtnorm)
+library(car)
+library(GGally)
+
+
+data <- read_table("BreathingZonePM.txt", show_col_types = FALSE)
+data$Activity <- as.factor(data$Activity)
+
+head(data)
+```
+
+### EDA
+
+```{r}
+ggplot(data, mapping = aes(x=Aerosol, y= Activity)) + geom_boxplot()
+ggplot(data, mapping = aes(x=(Aerosol-Stationary),y=Activity)) + geom_boxplot()
+ggplot(data, mapping = aes(x=(Aerosol-Stationary),y=Minute)) + geom_point()
+
+```
+## Fitting Model - assumptions not met
+```{r}
+lm1 <- lm(Aerosol ~ . -Stationary, data = data)
+
+summary(lm1)
+
+avPlots(lm1)
+ggplot(data, mapping = aes(x=resid(lm1))) + geom_histogram()
+ggplot(data, mapping = aes(x=resid(lm1), y=fitted(lm1))) + geom_point()
+
+#nothing looks linear, residual normality is not present, resid vs fitted shows pattern
+```
+
+## Adjusting to meet assumptions
+```{r}
+lm2 <- gls(Aerosol ~ . -Stationary, data = data, correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1), method = "ML")
+
+summary(lm2)
+AIC(lm2)
+
+source
+ggplot(data, mapping = aes(x=resid(lm2))) + geom_histogram()
+ggplot(data, mapping = aes(x=resid(lm2), y=fitted(lm2))) + geom_point()
+```
+
