@@ -1,0 +1,114 @@
+---
+title: "PM Exposure"
+author: "AB, AH, MK"
+format: html
+editor: visual
+---
+
+#### setup
+
+```{r}
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(forecast)
+library(multcomp)
+library(nlme)
+library(corrplot)
+library(mvtnorm)
+library(car)
+library(GGally)
+source("stdres.gls.R")
+
+
+data <- read_table("BreathingZonePM.txt", show_col_types = FALSE)
+data$Activity <- as.factor(data$Activity)
+```
+
+### EDA
+
+```{r}
+# Boxplot by Activity
+ggplot(data, aes(x = Activity, y = Aerosol)) +
+  geom_boxplot() +
+  labs(title = "PM Measurements by Activity",
+       x = "Activity",
+       y = "PM Measurements on Vest")
+
+# Scatterplot of Vest vs. Stationary
+ggplot(data, aes(x = Stationary, y = Aerosol)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "PM Measurements on Vest vs. Stationary Monitor",
+       x = "PM Measurements on Stationary Monitor",
+       y = "PM Measurements on Vest")
+
+# Scatterplot of Vest over Time Colored by Activity with Trend Lines
+ggplot(data, aes(x = Minute, y = Aerosol, color = Activity)) +
+  geom_point() +
+  labs(title = "PM Measurements on Vest Over Time",
+       x = "Minute",
+       y = "PM Measurements on Vest")
+```
+
+```{r}
+# Fit the linear model
+lm_model <- lm(Aerosol ~ Stationary + Activity + Minute, data = data)
+
+# Explore the residuals
+residuals <- resid(lm_model)
+
+# Organize residuals into a matrix and print it
+residuals_matrix <- matrix(residuals, nrow=nrow(data), ncol = 3, byrow = TRUE)
+
+cor(residuals_matrix)
+```
+
+There is evidence of correlation
+
+## Write out the model
+
+## Model Validation
+
+```{r}
+# Fit the MLR model with AR1 correlation structure
+model_ar1 <- gls(Aerosol ~ Activity + Minute,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+
+# Fit the MLR model with MA1 correlation structure
+model_ma1 <- gls(Aerosol ~ Activity + Minute,
+                correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
+                data = data)
+
+# Compare model fits using AIC
+AIC(model_ar1)
+AIC(model_ma1)
+
+```
+
+```{r}
+model <- gls(Aerosol ~ Stationary + Activity + Minute,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+
+# Linear Assumption
+avPlots(lm_model)
+
+
+# Check independence using the decorrelated residuals
+residuals <- stdres.gls(model)
+
+# Organize residuals into a matrix and print it
+residuals_matrix2 <- matrix(residuals, nrow=nrow(data), ncol = 3, byrow = TRUE)
+
+cor(residuals_matrix2)
+
+
+# Check normality using histogram of decorrelated residuals
+ggplot() +
+  geom_histogram(mapping = aes(x=residuals))
+
+
+# Check equal variance using a fitted vs decorrelated residuals plot
+ggplot()+
+  geom_point(mapping = aes(x=fitted(model), y = residuals))
+```
