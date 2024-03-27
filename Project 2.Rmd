@@ -1,0 +1,154 @@
+---
+title: "Project 2"
+author: "Autumn Hakes"
+date: "2024-03-13"
+output: pdf_document
+---
+
+-continuously for 1 hour
+-not large data set
+-3 is interaction
+-not going to be able to answer these with all one model
+-just stationary in it? build from there
+-build up a model simple -> not as simple
+-there is correlation in the data - same kid measured every minute in an hour and there's 100 different kids
+-For every kid, measured every minute for an hour – 59-60 measurements – a general symmetric correlation matrix would be 60*59/2… too many to handle – don’t use general symmetric – use something else
+-questions build on themselves
+-1 - only use stationary, find out how well this does
+-2 - throw in activities
+-3 - interactions between activities and kids - effect on activity kids specific - throw that in the model - is it better than the previous two
+-4 - B0 + B1Activity1 + B2Activity1:Kid1 + B3Activity:Kid2
+- (B1 + B2) and (B1 + B3) ... calculate them all and draw a histogram for every activity - use names of the coefficients
+-use RMSE
+-stationary needs to be in the final model even if it is not significant
+-validating model assumptions - it might be beneficial if you consider transformations of the response and stationary - use the log scale
+
+
+```{r}
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(forecast)
+library(multcomp)
+library(nlme)
+library(corrplot)
+library(mvtnorm)
+library(car)
+library(GGally)
+source("stdres.gls.R")
+
+
+data <- read_table("BreathingZonePM.txt", show_col_types = FALSE)
+data$Activity <- as.factor(data$Activity)
+```
+
+
+```{r}
+# Boxplot by Activity
+ggplot(data, aes(x = Activity, y = Aerosol)) +
+  geom_boxplot() +
+  labs(title = "PM Measurements by Activity",
+       x = "Activity",
+       y = "PM Measurements on Vest")
+
+# Scatterplot of Vest vs. Stationary
+ggplot(data, aes(x = Stationary, y = Aerosol)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "PM Measurements on Vest vs. Stationary Monitor",
+       x = "PM Measurements on Stationary Monitor",
+       y = "PM Measurements on Vest")
+
+# Scatterplot of Vest over Time Colored by Activity with Trend Lines
+ggplot(data, aes(x = Minute, y = Aerosol, color = Activity)) +
+  geom_point() +
+  labs(title = "PM Measurements on Vest Over Time",
+       x = "Minute",
+       y = "PM Measurements on Vest")
+```
+
+
+
+```{r}
+# Fit the linear model
+lm_model <- lm(Aerosol ~ Stationary + Activity + Minute, data = data)
+
+# Explore the residuals
+residuals <- resid(lm_model)
+
+# Organize residuals into a matrix and print it
+residuals_matrix <- matrix(residuals, nrow=nrow(data), ncol = 3, byrow = TRUE)
+
+cor(residuals_matrix)
+```
+
+There is high correlation.
+
+```{r}
+model_ar1 <- gls(Aerosol ~ Stationary,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+
+model_ma1 <- gls(Aerosol ~ Stationary,
+                correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
+                data = data)
+
+AIC(model_ar1)
+AIC(model_ma1)
+```
+
+With just stationary, MA1 is lower AIC = better
+
+```{r}
+model_ar2 <- gls(Aerosol ~ Stationary + Activity,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+
+model_ma2 <- gls(Aerosol ~ Stationary + Activity,
+                correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
+                data = data)
+
+AIC(model_ar2)
+AIC(model_ma2)
+```
+
+Adding Activity, MA2 is better. It is also lower AIC than MA1.
+
+```{r}
+model_ar3 <- gls(Aerosol ~ Stationary + Activity + Activity:ID,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+
+model_ma3 <- gls(Aerosol ~ Stationary + Activity + Activity:ID,
+                correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
+                data = data)
+
+AIC(model_ar3)
+AIC(model_ma3)
+```
+
+Adding interaction between activity and kid, AR3 has a lower AIC and it's lower than MA1 and MA2.
+
+```{r}
+# Linear Assumption
+avPlots(lm_model)
+
+
+# Check independence using the decorrelated residuals
+residuals <- stdres.gls(model_ar3)
+
+# Organize residuals into a matrix and print it
+residuals_matrix2 <- matrix(residuals, nrow=nrow(data), ncol = 3, byrow = TRUE)
+
+cor(residuals_matrix2)
+
+
+# Check normality using histogram of decorrelated residuals
+ggplot() +
+  geom_histogram(mapping = aes(x=residuals))
+
+
+# Check equal variance using a fitted vs decorrelated residuals plot
+ggplot()+
+  geom_point(mapping = aes(x=fitted(model_ar3), y = residuals))
+```
+
+
+
