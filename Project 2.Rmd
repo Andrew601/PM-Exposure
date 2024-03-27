@@ -85,10 +85,10 @@ cor(residuals_matrix)
 There is high correlation.
 
 ```{r}
-model_ar1 <- gls(Aerosol ~ Stationary,
+model_ar1 <- gls(log(Aerosol) ~ log(Stationary),
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
 
-model_ma1 <- gls(Aerosol ~ Stationary,
+model_ma1 <- gls(log(Aerosol) ~ log(Stationary),
                 correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
                 data = data)
 
@@ -99,10 +99,10 @@ AIC(model_ma1)
 With just stationary, MA1 is lower AIC = better
 
 ```{r}
-model_ar2 <- gls(Aerosol ~ Stationary + Activity,
+model_ar2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
 
-model_ma2 <- gls(Aerosol ~ Stationary + Activity,
+model_ma2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
                 correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
                 data = data)
 
@@ -113,10 +113,10 @@ AIC(model_ma2)
 Adding Activity, MA2 is better. It is also lower AIC than MA1.
 
 ```{r}
-model_ar3 <- gls(Aerosol ~ Stationary + Activity + Activity:ID,
+model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + Activity + Activity:ID,
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
 
-model_ma3 <- gls(Aerosol ~ Stationary + Activity + Activity:ID,
+model_ma3 <- gls(log(Aerosol) ~ log(Stationary) + Activity + Activity:ID,
                 correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
                 data = data)
 
@@ -149,6 +149,4 @@ ggplot() +
 ggplot()+
   geom_point(mapping = aes(x=fitted(model_ar3), y = residuals))
 ```
-
-
 

@@ -53,7 +53,7 @@ ggplot(data, aes(x = Minute, y = Aerosol, color = Activity)) +
 
 ```{r}
 # Fit the linear model
-lm_model <- lm(Aerosol ~ Stationary + Activity + Minute, data = data)
+lm_model <- lm(log(Aerosol) ~ log(Stationary) + Activity + Minute, data = data)
 
 # Explore the residuals
 residuals <- resid(lm_model)
@@ -87,7 +87,7 @@ AIC(model_ma1)
 ```
 
 ```{r}
-model <- gls(Aerosol ~ Stationary + Activity + Minute,
+model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + Activity + Activity:ID,
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
 
 # Linear Assumption
@@ -95,7 +95,7 @@ avPlots(lm_model)
 
 
 # Check independence using the decorrelated residuals
-residuals <- stdres.gls(model)
+residuals <- stdres.gls(model_ar3)
 
 # Organize residuals into a matrix and print it
 residuals_matrix2 <- matrix(residuals, nrow=nrow(data), ncol = 3, byrow = TRUE)
@@ -110,5 +110,5 @@ ggplot() +
 
 # Check equal variance using a fitted vs decorrelated residuals plot
 ggplot()+
-  geom_point(mapping = aes(x=fitted(model), y = residuals))
+  geom_point(mapping = aes(x=fitted(model_ar3), y = residuals))
 ```
