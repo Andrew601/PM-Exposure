@@ -84,6 +84,8 @@ cor(residuals_matrix)
 
 There is high correlation.
 
+## 1.
+
 ```{r}
 model_ar1 <- gls(log(Aerosol) ~ log(Stationary),
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
@@ -94,10 +96,31 @@ model_ma1 <- gls(log(Aerosol) ~ log(Stationary),
 
 AIC(model_ar1)
 AIC(model_ma1)
+summary(model_ar1)
 ```
 
-With just stationary, MA1 is lower AIC = better
+With just stationary, AR1 is lower AIC = better
 
+```{r}
+# Predict the values using the model
+predicted_values <- predict(model_ar1)
+observed_values <- data$Aerosol
+
+# Calculate the RMSE
+rmse <- sqrt(mean((observed_values - predicted_values)^2))
+print(rmse)
+
+# Calculate Pseudo R-squared
+pseudo_r_squared <- cor(observed_values, predicted_values)^2
+print(pseudo_r_squared)
+```
+RMSE = 10.40912: This value indicates that, on average, the model's predictions are about 10.40912 units away from the actual 'Aerosol' values. In context of the data is 10.4 lower or higher a large value?
+
+Pseudo R-squared = 0.00313318: This value is very close to 0, suggesting that the model explains very little of the variance in the 'Aerosol' data — only about 0.31%. A low value like this one implies that the independent variables included in the model have very little predictive power concerning the dependent variable.
+
+In summary, the RMSE is relatively high (considering the context of 'Aerosol' values), and the Pseudo R-squared is very low. Both of these suggest that the model may not be performing well in predicting the 'Aerosol' variable. It's worth considering model diagnostics and potentially looking into model improvements, such as feature engineering, model selection, or addressing any data quality issues. It could also be informative to compare this model to simpler or more complex models, or even to different types of models, to see if they can provide better predictive accuracy.
+
+## 2. 
 ```{r}
 model_ar2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)

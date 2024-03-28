@@ -47,6 +47,23 @@ ggplot(data, mapping = aes(x=resid(lm1), y=fitted(lm1))) + geom_point()
 #nothing looks linear, residual normality is not present, resid vs fitted shows pattern
 ```
 
+## 1.
+```{r}
+station_model <- gls(Aerosol ~ Stationary, data = data, correlation = corARMA(form = ~ Minute | ID, p =1, q=1), method = "ML")
+
+summary(station_model)
+source("stdres.gls.R")
+
+sres <- stdres.gls(station_model)
+ggplot(data,mapping = aes(x=sres)) + geom_histogram()
+```
+## 2.
+```{r}
+
+```
+
+
+
 ## Adjusting to meet assumptions
 ```{r}
 lm2 <- gls(Aerosol ~ . -Stationary, data = data, correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1), method = "ML")
@@ -59,3 +76,8 @@ ggplot(data, mapping = aes(x=resid(lm2))) + geom_histogram()
 ggplot(data, mapping = aes(x=resid(lm2), y=fitted(lm2))) + geom_point()
 ```
 
+$$
+y \sim N(X\beta,\sigma^2B) \\
+y = X\beta + \epsilon, \epsilon \sim N(0,\sigma^2B) \\
+B = diag(R,...,R)
+$$
