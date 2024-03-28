@@ -131,6 +131,8 @@ model_ma2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
 
 AIC(model_ar2)
 AIC(model_ma2)
+
+anova(model_ar1, model_ar2)
 ```
 
 Adding Activity, MA2 is better. It is also lower AIC than MA1.
@@ -145,6 +147,8 @@ model_ma3 <- gls(log(Aerosol) ~ log(Stationary) + Activity + Activity:ID,
 
 AIC(model_ar3)
 AIC(model_ma3)
+
+summary(model_ar3)
 ```
 
 Adding interaction between activity and kid, AR3 has a lower AIC and it's lower than MA1 and MA2.
