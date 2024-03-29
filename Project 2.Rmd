@@ -40,6 +40,7 @@ source("stdres.gls.R")
 
 data <- read_table("BreathingZonePM.txt", show_col_types = FALSE)
 data$Activity <- as.factor(data$Activity)
+data$ID <- as.factor(data$ID)
 ```
 
 
@@ -96,7 +97,7 @@ AIC(model_ar1)
 AIC(model_ma1)
 ```
 
-With just stationary, MA1 is lower AIC = better
+With just stationary, AR1 is lower AIC = better
 
 ```{r}
 model_ar2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
@@ -110,13 +111,13 @@ AIC(model_ar2)
 AIC(model_ma2)
 ```
 
-Adding Activity, MA2 is better. It is also lower AIC than MA1.
+Adding Activity, AR2 is the lowest so far.
 
 ```{r}
-model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + Activity + Activity:ID,
+model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + ID*Activity,
                 correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
 
-model_ma3 <- gls(log(Aerosol) ~ log(Stationary) + Activity + Activity:ID,
+model_ma3 <- gls(log(Aerosol) ~ log(Stationary) + ID*Activity,
                 correlation = corARMA(form = ~ Minute | ID, p = 1, q = 1),
                 data = data)
 
@@ -124,7 +125,8 @@ AIC(model_ar3)
 AIC(model_ma3)
 ```
 
-Adding interaction between activity and kid, AR3 has a lower AIC and it's lower than MA1 and MA2.
+Adding interaction between activity and kid, AR3 is the best of all of the models. AIC = 3974.764
+MA3 = 4732.522
 
 ```{r}
 # Linear Assumption
@@ -150,3 +152,114 @@ ggplot()+
   geom_point(mapping = aes(x=fitted(model_ar3), y = residuals))
 ```
 
+The AR models all have a lower AIC than the MA models. 
+
+For research question 1, our model is:
+```{r}
+model_ar1 <- gls(log(Aerosol) ~ log(Stationary),
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+```
+
+```{r}
+summary(model_ar1)
+```
+
+P-value = 0, coefficient = .082 on the log scale, or e^.082
+
+For question 2, we add in activity. The AR2 model is:
+```{r}
+model_ar2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+```
+
+```{r}
+summary(model_ar2)
+```
+
+Compare this R^2 to the R^2 with just stationary
+
+Homework and furniture are not significant, phone, floor, games, walking, tv are significant
+
+For question 3, we add in the interaction between activity and child (ID). The best model is AR3:
+```{r}
+model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + ID*Activity,
+                correlation = corAR1(form = ~ Minute | ID), method = "ML", data = data)
+```
+
+```{r}
+summary(model_ar3)
+```
+
+```{r}
+# Extract constrained estimates of the general correlation structure
+cor_constrained <- coef(model_ar3$modelStruct$corStruct, unconstrained = FALSE)
+cor_constrained
+
+# Extract beta coefficients
+coefficients <- coef(model_ar3)
+coefficients
+
+# Extract the estimate of the variance parameter sigma^2
+sigma_squared <- summary(model_ar3)$sigma^2
+sigma_squared
+```
+
+```{r}
+getAct <- "Homework"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+
+getAct <- "OnPhone"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+
+getAct <- "PlayingOnFloor"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+
+getAct <- "PlayingOnFurniture"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+
+getAct <- "VideoGames"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+
+getAct <- "Walking"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+
+getAct <- "WatchingTV"
+theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
+theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
+mean(theCoefs)
+hist(theCoefs)
+```
+
+-0.03065063
+0.1174998
+0.3195713
+0.07951205
+0.07554739
+0.0783212
+0.1049647
+
+compare the coefficients
+
+What activities (on average across children if child specific) lead to higher PM exposure?
+
+"PlayingOnFloor" has the highest average coefficient value (0.3195713). This suggests that, on average across children (if the model accounts for child-specific effects), spending time playing on the floor tends to lead to higher PM exposure 
+
+add coefficient for activity + coefficient for activity1:kid1 + activity1:kid2 + ... + activity2kid1 + activity2kid2 +...
