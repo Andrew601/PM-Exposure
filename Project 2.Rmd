@@ -232,49 +232,57 @@ sigma_squared
 ```
 
 ```{r}
-getAct <- "Homework"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct1 <- "Homework"
+HWCoefs <- coef(model_ar3)[grepl(getAct1, names(coef(model_ar3)))]
+HWCoefs[-1] <- HWCoefs[1] + HWCoefs[-1]
+mean(HWCoefs)
+sd(HWCoefs)
+hist(HWCoefs, main = "Histogram of Homework Coefficients", xlab = "Homework Coefficients")
 
-getAct <- "OnPhone"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct2 <- "OnPhone"
+OPCoefs <- coef(model_ar3)[grepl(getAct2, names(coef(model_ar3)))]
+OPCoefs[-1] <- OPCoefs[1] + OPCoefs[-1]
+mean(OPCoefs)
+sd(OPCoefs)
+hist(OPCoefs, main = "Histogram of On the Phone Coefficients", xlab = "On the Phone Coefficients")
 
-getAct <- "PlayingOnFloor"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct3 <- "PlayingOnFloor"
+PFCoefs <- coef(model_ar3)[grepl(getAct3, names(coef(model_ar3)))]
+PFCoefs[-1] <- PFCoefs[1] + PFCoefs[-1]
+mean(PFCoefs)
+sd(PFCoefs)
+hist(PFCoefs, main = "Histogram of Playing on Floor Coefficients", xlab = "Playing on Floor Coefficients")
 
-getAct <- "PlayingOnFurniture"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct4 <- "PlayingOnFurniture"
+PCCoefs <- coef(model_ar3)[grepl(getAct4, names(coef(model_ar3)))]
+PCCoefs[-1] <- PCCoefs[1] + PCCoefs[-1]
+mean(PCCoefs)
+sd(PCCoefs)
+hist(PCCoefs, main = "Histogram of Playing on Furniture Coefficients", xlab = "Playing on Furniture Coefficients")
 
-getAct <- "VideoGames"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct5 <- "VideoGames"
+VGCoefs <- coef(model_ar3)[grepl(getAct5, names(coef(model_ar3)))]
+VGCoefs[-1] <- VGCoefs[1] + VGCoefs[-1]
+mean(VGCoefs)
+sd(VGCoefs)
+hist(VGCoefs, main = "Histogram of Video Games Coefficients", xlab = "Video Games Coefficients")
 
-getAct <- "Walking"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct6 <- "Walking"
+WCoefs <- coef(model_ar3)[grepl(getAct6, names(coef(model_ar3)))]
+WCoefs[-1] <- WCoefs[1] + WCoefs[-1]
+mean(WCoefs)
+sd(WCoefs)
+hist(WCoefs, main = "Histogram of Walking Coefficients", xlab = "Walking Coefficients")
 
-getAct <- "WatchingTV"
-theCoefs <- coef(model_ar3)[grepl(getAct, names(coef(model_ar3)))]
-theCoefs[-1] <- theCoefs[1] + theCoefs[-1]
-mean(theCoefs)
-hist(theCoefs)
+getAct7 <- "WatchingTV"
+TVCoefs <- coef(model_ar3)[grepl(getAct7, names(coef(model_ar3)))]
+TVCoefs[-1] <- TVCoefs[1] + TVCoefs[-1]
+mean(TVCoefs)
+sd(TVCoefs)
+hist(TVCoefs, main = "Histogram of Watching TV Coefficients", xlab = "Watching TV Coefficients")
 ```
 
+Means
 -0.03065063
 0.1174998
 0.3195713
@@ -283,10 +291,17 @@ hist(theCoefs)
 0.0783212
 0.1049647
 
-compare the coefficients
+sd's
+0.882339
+0.7048728
+0.9520436
+0.8417187
+0.7179658
+0.8133219
+0.7708538
 
 What activities (on average across children if child specific) lead to higher PM exposure?
 
-"PlayingOnFloor" has the highest average coefficient value (0.3195713). This suggests that, on average across children (if the model accounts for child-specific effects), spending time playing on the floor tends to lead to higher PM exposure 
+"PlayingOnFloor" has the highest average coefficient value (0.3195713) and standard deviation (0.9520436). This suggests that, on average across children (if the model accounts for child-specific effects), spending time playing on the floor tends to lead to higher PM exposure 
 
 add coefficient for activity + coefficient for activity1:kid1 + activity1:kid2 + ... + activity2kid1 + activity2kid2 +...
