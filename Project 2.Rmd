@@ -99,6 +99,8 @@ AIC(model_ar1)
 AIC(model_ma1)
 summary(model_ar1)
 ```
+5760.187
+5769.569
 
 With just stationary, AR1 is lower AIC = better
 
@@ -135,6 +137,10 @@ AIC(model_ma2)
 
 anova(model_ar1, model_ar2)
 ```
+5680.786
+5725.441
+
+anova p-value = <.0001
 
 Adding Activity, AR2 is the lowest so far.
 
@@ -152,8 +158,8 @@ AIC(model_ma3)
 summary(model_ar3)
 ```
 
-Adding interaction between activity and kid, AR3 is the best of all of the models. AIC = 3974.764
-MA3 = 4732.522
+Adding interaction between activity and kid, AR3 is the best of all of the models. AIC AR1 = 3974.764
+AIC MA3 = 4732.522
 
 ```{r}
 # Linear Assumption
