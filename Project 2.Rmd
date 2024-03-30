@@ -195,7 +195,20 @@ model_ar1 <- gls(log(Aerosol) ~ log(Stationary),
 
 ```{r}
 summary(model_ar1)
+
+# Predict the values using the model
+predicted_values <- predict(model_ar1)
+observed_values <- data$Aerosol
+
+# Calculate the RMSE
+rmse <- sqrt(mean((observed_values - predicted_values)^2))
+rmse
+
+# Calculate Pseudo R-squared
+pseudo_r_squared <- cor(observed_values, predicted_values)^2
+pseudo_r_squared
 ```
+
 
 P-value = 0, coefficient = .082 on the log scale, or e^.082
 
@@ -207,6 +220,18 @@ model_ar2 <- gls(log(Aerosol) ~ log(Stationary) + Activity,
 
 ```{r}
 summary(model_ar2)
+
+# Predict the values using the model
+predicted_values2 <- predict(model_ar2)
+observed_values2 <- data$Aerosol
+
+# Calculate the RMSE
+rmse2 <- sqrt(mean((observed_values2 - predicted_values2)^2))
+rmse2
+
+# Calculate Pseudo R-squared
+pseudo_r_squared2 <- cor(observed_values2, predicted_values2)^2
+pseudo_r_squared2
 ```
 
 Compare this R^2 to the R^2 with just stationary
@@ -221,6 +246,18 @@ model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + ID*Activity,
 
 ```{r}
 summary(model_ar3)
+
+# Predict the values using the model
+predicted_values3 <- predict(model_ar3)
+observed_values3 <- data$Aerosol
+
+# Calculate the RMSE
+rmse3 <- sqrt(mean((observed_values3 - predicted_values3)^2))
+rmse3
+
+# Calculate Pseudo R-squared
+pseudo_r_squared3 <- cor(observed_values3, predicted_values3)^2
+pseudo_r_squared3
 ```
 
 ```{r}
