@@ -238,6 +238,11 @@ Compare this R^2 to the R^2 with just stationary
 
 Homework and furniture are not significant, phone, floor, games, walking, tv are significant
 
+```{r}
+anova(model_ar1,model_ar2)
+```
+
+
 For question 3, we add in the interaction between activity and child (ID). The best model is AR3:
 ```{r}
 model_ar3 <- gls(log(Aerosol) ~ log(Stationary) + ID*Activity,
@@ -267,7 +272,7 @@ cor_constrained
 
 # Extract beta coefficients
 coefficients <- coef(model_ar3)
-coefficients
+coefficients  
 
 # Extract the estimate of the variance parameter sigma^2
 sigma_squared <- summary(model_ar3)$sigma^2
